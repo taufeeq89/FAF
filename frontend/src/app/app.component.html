@@ -1,0 +1,39 @@
+<div class="tabs">
+  <button class="tab-button" [class.active]="activeTab === 'home'" (click)="selectTab('home')">Home</button>
+  <button class="tab-button" [class.active]="activeTab === 'profile'" (click)="selectTab('profile')">Profile</button>
+  <button class="tab-button" [class.active]="activeTab === 'stock'" (click)="selectTab('stock')">Stock</button>
+  <button class="tab-button" [class.active]="activeTab === 'settings'" (click)="selectTab('settings')">Settings</button>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div *ngIf="activeTab === 'home'">
+      <h1>Welcome to FAF</h1>
+      <p>This app uses a Python middle tier, MongoDB backend, and Google authentication.</p>
+      <button class="primary" *ngIf="!user.loggedIn" (click)="login()">Sign in with Google</button>
+      <div *ngIf="user.loggedIn" class="login-status">
+        <p><strong>Signed in as:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <button class="primary" (click)="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'profile'">
+      <h2>Profile</h2>
+      <p *ngIf="!user.loggedIn">Please sign in to view your profile.</p>
+      <div *ngIf="user.loggedIn">
+        <p>Name: {{ user.name }}</p>
+        <p>Email: {{ user.email }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'stock'">
+      <app-fair-value-calculator></app-fair-value-calculator>
+    </div>
+
+    <div *ngIf="activeTab === 'settings'">
+      <h2>Settings</h2>
+      <p>Future settings and app preferences will appear here.</p>
+    </div>
+  </div>
+</div>

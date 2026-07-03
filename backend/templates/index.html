@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FAF Fair Value Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f3f6fb;
+      color: #1f2937;
+    }
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      line-height: 1.05;
+    }
+    header p {
+      max-width: 640px;
+      margin: 12px 0 0;
+      color: #475569;
+    }
+    .search-panel {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .ticker-input {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ticker-input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    }
+    .primary-button {
+      border: none;
+      border-radius: 14px;
+      padding: 16px 26px;
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .primary-button:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+    .primary-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      color: #475569;
+    }
+    .status-bar strong {
+      color: #0f172a;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      font-size: 0.95rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .panel {
+      background: white;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+    .panel h2 {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 1.25rem;
+    }
+    .metric {
+      display: grid;
+      gap: 10px;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+    .metric-name {
+      color: #475569;
+    }
+    .metric-value {
+      font-weight: 700;
+      color: #111827;
+    }
+    .warning-card,
+    .error-card {
+      background: #f8fafc;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin-top: 18px;
+    }
+    .warning-card strong,
+    .error-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+    .error-card {
+      background: #fee2e2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eef2ff;
+      color: #3730a3;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 0.92rem;
+    }
+    .badge span {
+      font-weight: 700;
+    }
+    .hint {
+      color: #64748b;
+      margin-top: 12px;
+      font-size: 0.96rem;
+      line-height: 1.6;
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>Fair Value Calculator</h1>
+        <p>Enter a ticker symbol to calculate fair value using the Python middle tier, real-time quotes, earnings estimates, and fallback valuation signals.</p>
+      </div>
+      <div class="badge"><span>API:</span> /api/stock/&lt;ticker&gt;</div>
+    </header>
+
+    <section class="panel">
+      <div class="search-panel">
+        <input id="tickerInput" class="ticker-input" type="text" placeholder="Add ticker symbol, e.g. AAPL" autofocus />
+        <button id="calculateBtn" class="primary-button">Calculate</button>
+      </div>
+      <div class="status-bar">
+        <div class="status-pill" id="statusMessage">Ready to calculate fair value</div>
+      </div>
+      <p class="hint">The calculator fetches company profile data, EPS estimates, growth assumptions, WACC, exit multiple, and computes an intrinsic value estimate.</p>
+    </section>
+
+    <div id="resultsContainer" class="grid" style="display:none;">
+      <div class="panel">
+        <h2>Fair Value Summary</h2>
+        <div class="metric" id="summaryMetrics"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Model Outputs</h2>
+        <div class="metric" id="modelMetrics"></div>
+      </div>
+    </div>
+
+    <div id="detailPanels" class="grid" style="display:none;">
+      <div class="panel">
+        <h2>Sources</h2>
+        <div class="metric" id="sourceMetrics"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Computed Warnings</h2>
+        <div class="warning-card" id="warningBox" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tickerInput = document.getElementById('tickerInput');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const detailPanels = document.getElementById('detailPanels');
+    const summaryMetrics = document.getElementById('summaryMetrics');
+    const modelMetrics = document.getElementById('modelMetrics');
+    const sourceMetrics = document.getElementById('sourceMetrics');
+    const warningBox = document.getElementById('warningBox');
+
+    calculateBtn.addEventListener('click', () => fetchFairValue());
+    tickerInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        fetchFairValue();
+      }
+    });
+
+    function formatNumber(value, digits = 2) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return '-';
+      }
+      return new Intl.NumberFormat('en-US', { maximumFractionDigits: digits }).format(value);
+    }
+
+    function setStatus(text, type = 'info') {
+      statusMessage.textContent = text;
+      if (type === 'error') {
+        statusMessage.style.background = '#fee2e2';
+        statusMessage.style.color = '#991b1b';
+        statusMessage.style.borderColor = '#fecaca';
+      } else {
+        statusMessage.style.background = '#fff';
+        statusMessage.style.color = '#475569';
+        statusMessage.style.borderColor = '#e2e8f0';
+      }
+    }
+
+    function createMetricRow(label, value) {
+      const row = document.createElement('div');
+      row.className = 'metric-row';
+      const name = document.createElement('div');
+      name.className = 'metric-name';
+      name.textContent = label;
+      const val = document.createElement('div');
+      val.className = 'metric-value';
+      val.innerHTML = value === null || value === undefined ? '-' : value;
+      row.appendChild(name);
+      row.appendChild(val);
+      return row;
+    }
+
+    function renderResult(data) {
+      summaryMetrics.innerHTML = '';
+      modelMetrics.innerHTML = '';
+      sourceMetrics.innerHTML = '';
+
+      const intrinsic = data.intrinsicValue;
+      summaryMetrics.appendChild(createMetricRow('Company', `${data.companyName || 'N/A'} (${data.ticker || ''})`));
+      summaryMetrics.appendChild(createMetricRow('Market Price', `$${formatNumber(data.price)}`));
+      summaryMetrics.appendChild(createMetricRow('Intrinsic Value', `$${formatNumber(intrinsic)}`));
+      summaryMetrics.appendChild(createMetricRow('Premium / Discount', `${data.price && intrinsic ? formatNumber(((data.price - intrinsic) / intrinsic) * 100, 1) + '%' : 'N/A'}`));
+
+      modelMetrics.appendChild(createMetricRow('Price Source', data.priceSource || '—'));
+      modelMetrics.appendChild(createMetricRow('EPS', data.eps ? `$${formatNumber(data.eps)}` : 'N/A'));
+      modelMetrics.appendChild(createMetricRow('Growth Rate', data.growthRate ? `${formatNumber(data.growthRate, 1)}%` : 'N/A'));
+      modelMetrics.appendChild(createMetricRow('WACC', data.wacc ? `${formatNumber(data.wacc, 1)}%` : 'N/A'));
+      modelMetrics.appendChild(createMetricRow('Exit P/E', data.exitPE ? formatNumber(data.exitPE, 1) : 'N/A'));
+      modelMetrics.appendChild(createMetricRow('Terminal Growth', data.terminalGrowth ? `${formatNumber(data.terminalGrowth, 1)}%` : 'N/A'));
+
+      sourceMetrics.appendChild(createMetricRow('EPS Source', data.epsSource || '—'));
+      sourceMetrics.appendChild(createMetricRow('Growth Source', data.growthSource || '—'));
+      sourceMetrics.appendChild(createMetricRow('WACC Source', data.waccSource || '—'));
+      sourceMetrics.appendChild(createMetricRow('Exit PE Source', data.exitPESource || '—'));
+      sourceMetrics.appendChild(createMetricRow('Terminal Source', data.terminalSource || '—'));
+
+      if (Array.isArray(data.warnings) && data.warnings.length) {
+        warningBox.style.display = 'block';
+        warningBox.innerHTML = `<strong>Warnings & fallback notes</strong><ul>${data.warnings.map(msg => `<li>${escapeHtml(msg)}</li>`).join('')}</ul>`;
+      } else {
+        warningBox.style.display = 'none';
+      }
+
+      resultsContainer.style.display = 'grid';
+      detailPanels.style.display = 'grid';
+    }
+
+    function escapeHtml(text) {
+      return text?.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) || '';
+    }
+
+    async function fetchFairValue() {
+      const ticker = tickerInput.value.trim().toUpperCase();
+      if (!ticker) {
+        setStatus('Enter a valid ticker symbol first.', 'error');
+        return;
+      }
+
+      setStatus(`Fetching fair value for ${ticker}...`);
+      calculateBtn.disabled = true;
+      resultsContainer.style.display = 'none';
+      detailPanels.style.display = 'none';
+      warningBox.style.display = 'none';
+
+      try {
+        const response = await fetch(`/api/stock/${ticker}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          setStatus(data.error || 'Unable to fetch stock data.', 'error');
+          return;
+        }
+
+        renderResult(data);
+        setStatus(`Last refreshed: ${new Date().toLocaleTimeString()}`);
+      } catch (error) {
+        setStatus('Network error while fetching stock data.', 'error');
+      } finally {
+        calculateBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

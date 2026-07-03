@@ -1,0 +1,70 @@
+<section class="calculator-page">
+  <header>
+    <div>
+      <h1>Fair Value Calculator</h1>
+      <p>Enter a ticker symbol to calculate fair value using the Python middle tier, real-time quotes, and fallback recovery sources.</p>
+    </div>
+    <div class="badge"><span>API:</span> /api/stock/&lt;ticker&gt;</div>
+  </header>
+
+  <section class="panel search-panel">
+    <div class="search-group">
+      <input
+        class="ticker-input"
+        type="text"
+        [(ngModel)]="ticker"
+        placeholder="Add ticker symbol, e.g. AAPL"
+      />
+      <button class="primary-button" (click)="lookupStock()" [disabled]="loadingStock">
+        {{ loadingStock ? 'Calculating…' : 'Calculate' }}
+      </button>
+    </div>
+    <div class="status-bar">
+      <div class="status-pill" *ngIf="!stockResult && !stockError && !loadingStock">Ready to calculate fair value</div>
+      <div class="status-pill" *ngIf="loadingStock">Fetching fair value for {{ ticker }}…</div>
+      <div class="status-pill error-pill" *ngIf="stockError">{{ stockError }}</div>
+    </div>
+    <p class="hint">The calculator fetches company profile data, EPS estimates, growth assumptions, WACC, exit multiple, and computes an intrinsic value estimate.</p>
+  </section>
+
+  <div class="grid" *ngIf="stockResult">
+    <div class="panel">
+      <h2>Fair Value Summary</h2>
+      <div class="metric-row"><span>Company</span><strong>{{ stockResult.companyName || ticker }} ({{ stockResult.ticker || ticker }})</strong></div>
+      <div class="metric-row"><span>Market Price</span><strong>{{ formatCurrency(stockResult.price) }}</strong></div>
+      <div class="metric-row"><span>Intrinsic Value</span><strong>{{ formatCurrency(stockResult.intrinsicValue) }}</strong></div>
+      <div class="metric-row"><span>Premium / Discount</span><strong>{{ premiumDiscount() }}</strong></div>
+    </div>
+
+    <div class="panel">
+      <h2>Model Outputs</h2>
+      <div class="metric-row"><span>Price Source</span><strong>{{ stockResult.priceSource || '—' }}</strong></div>
+      <div class="metric-row"><span>EPS</span><strong>{{ formatCurrency(stockResult.eps) }}</strong></div>
+      <div class="metric-row"><span>Growth Rate</span><strong>{{ formatPercent(stockResult.growthRate, 1) }}</strong></div>
+      <div class="metric-row"><span>WACC</span><strong>{{ formatPercent(stockResult.wacc, 1) }}</strong></div>
+      <div class="metric-row"><span>Exit P/E</span><strong>{{ formatNumber(stockResult.exitPE, 1) }}</strong></div>
+      <div class="metric-row"><span>Terminal Growth</span><strong>{{ formatPercent(stockResult.terminalGrowth, 1) }}</strong></div>
+    </div>
+  </div>
+
+  <div class="grid" *ngIf="stockResult">
+    <div class="panel">
+      <h2>Sources</h2>
+      <div class="metric-row"><span>EPS Source</span><strong>{{ stockResult.epsSource || '—' }}</strong></div>
+      <div class="metric-row"><span>Growth Source</span><strong>{{ stockResult.growthSource || '—' }}</strong></div>
+      <div class="metric-row"><span>WACC Source</span><strong>{{ stockResult.waccSource || '—' }}</strong></div>
+      <div class="metric-row"><span>Exit PE Source</span><strong>{{ stockResult.exitPESource || '—' }}</strong></div>
+      <div class="metric-row"><span>Terminal Source</span><strong>{{ stockResult.terminalSource || '—' }}</strong></div>
+    </div>
+
+    <div class="panel" *ngIf="stockResult.warnings?.length">
+      <h2>Computed Warnings</h2>
+      <div class="warning-card">
+        <strong>Warnings & fallback notes</strong>
+        <ul>
+          <li *ngFor="let warning of stockResult.warnings">{{ warning }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
