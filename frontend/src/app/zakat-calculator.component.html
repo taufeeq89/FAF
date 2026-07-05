@@ -157,6 +157,11 @@
 
     <label>Other Sources of Wealth</label>
     <input type="number" [(ngModel)]="otherWealth" (ngModelChange)="onValueChange()" />
+
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(investmentsSectionZakat) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
@@ -166,6 +171,11 @@
     </div>
     <label>Landed Property held as an Investment / Business (Estimate the current Market Value)</label>
     <input type="number" [(ngModel)]="landedProperty" (ngModelChange)="onValueChange()" />
+
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(landedPropertyZakat) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
@@ -192,6 +202,11 @@
       <span>TOTAL VALUE OF STOCK</span>
       <strong class="stock-total-value">{{ formatCurrency(businessTotalStockValue) }}</strong>
     </div>
+
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(businessZakat) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
@@ -206,17 +221,22 @@
     <input type="number" [(ngModel)]="partnershipCapital" (ngModelChange)="onValueChange()" />
 
     <label>Loans Advanced by you to the Firm as of Date</label>
-    <input type="number" [(ngModel)]="businessReceivables" (ngModelChange)="onValueChange()" />
+    <input type="number" [(ngModel)]="partnershipLoansAdvanced" (ngModelChange)="onValueChange()" />
 
     <label class="less-label">LESS: Withdrawals made by you during the current Year.</label>
-    <input type="number" [(ngModel)]="businessPayables" (ngModelChange)="onValueChange()" />
+    <input type="number" [(ngModel)]="partnershipWithdrawals" (ngModelChange)="onValueChange()" />
 
     <label>Accumulated Profit from the date of Balance Sheet to this Date (Estimate the Profit Value as it is difficult to get exact figures in the middle of an Accounting Year)</label>
     <input type="number" [(ngModel)]="partnershipProfitShare" (ngModelChange)="onValueChange()" />
 
     <div class="stock-total-row">
       <span>NETT TOTAL WORTH CALCULATED</span>
-      <strong class="stock-total-value">{{ formatCurrency(partnershipCapital + partnershipProfitShare - businessPayables) }}</strong>
+      <strong class="stock-total-value">{{ formatCurrency(partnershipNetWorth) }}</strong>
+    </div>
+
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(partnershipZakat) }}</strong>
     </div>
   </div>
 
@@ -229,10 +249,15 @@
     <input type="number" [(ngModel)]="agriculturalProduce" (ngModelChange)="onValueChange()" />
 
     <label>Produce totally dependent on Artificial Irrigation like Canal, Tank, Borewell, etc. - @ 5% of the Produce (crop) in Value or in Kind</label>
-    <input type="number" (ngModelChange)="onValueChange()" />
+    <input type="number" [(ngModel)]="agriculturalArtificialIrrigationProduce" (ngModelChange)="onValueChange()" />
 
     <label>Produce dependent Partially on Rain Water and Partially on Artificial Irrigation - 7.5% of the Produce Value or in Kind</label>
-    <input type="number" (ngModelChange)="onValueChange()" />
+    <input type="number" [(ngModel)]="agriculturalMixedIrrigationProduce" (ngModelChange)="onValueChange()" />
+
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(agriculturalZakat) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
@@ -253,6 +278,11 @@
       <span>Total Value</span>
       <strong class="stock-total-value">{{ formatCurrency(livestockValue) }}</strong>
     </div>
+
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(livestockZakat) }}</strong>
+    </div>
   </div>
 
   <div class="panel colorful-panel">
@@ -269,14 +299,16 @@
 
       <label>Income Tax / Wealth Tax Payable</label>
       <input type="number" [(ngModel)]="generalLiabilitiesTax" (ngModelChange)="onValueChange()" />
-
-      <label>Other general liabilities</label>
-      <input type="number" [(ngModel)]="otherLiabilities" (ngModelChange)="onValueChange()" />
     </div>
 
     <div class="highlight-row">
       <span>Total Liabilities</span>
       <strong>{{ formatCurrency(totalGeneralLiabilities) }}</strong>
+    </div>
+
+    <div class="liability-zakat-row">
+      <span>Total Zakat Payable On Liabilities (-2.75%)</span>
+      <strong>{{ formatCurrency(liabilityZakatAdjustment) }}</strong>
     </div>
 
     <div class="summary-grid">
@@ -317,3 +349,4 @@
     </div>
   </div>
 </section>
+

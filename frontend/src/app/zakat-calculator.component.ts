@@ -42,13 +42,16 @@ export class ZakatCalculatorComponent {
   businessPayables = 0;
   businessBadDebts = 0;
   partnershipCapital = 0;
+  partnershipLoansAdvanced = 0;
+  partnershipWithdrawals = 0;
   partnershipProfitShare = 0;
   agriculturalProduce = 0;
+  agriculturalArtificialIrrigationProduce = 0;
+  agriculturalMixedIrrigationProduce = 0;
   livestockValue = 0;
   generalLiabilitiesFriends = 0;
   generalLiabilitiesBanks = 0;
   generalLiabilitiesTax = 0;
-  otherLiabilities = 0;
   nisab = 0;
   zakatRate = 2.5;
 
@@ -81,20 +84,18 @@ export class ZakatCalculatorComponent {
       + this.getNumber(this.otherWealth)
       + this.getNumber(this.landedProperty)
       + this.businessTotalStockValue
-      + this.getNumber(this.partnershipCapital)
-      + this.getNumber(this.partnershipProfitShare)
-      + this.getNumber(this.agriculturalProduce)
+      + this.partnershipNetWorth
+      + this.agriculturalTotalProduce
       + this.getNumber(this.livestockValue);
 
     const totalLiabilities = this.getNumber(this.generalLiabilitiesFriends)
       + this.getNumber(this.generalLiabilitiesBanks)
-      + this.getNumber(this.generalLiabilitiesTax)
-      + this.getNumber(this.otherLiabilities);
+      + this.getNumber(this.generalLiabilitiesTax);
 
     const netAssets = totalAssets - totalLiabilities;
     const nisabAmount = this.getNumber(this.nisab);
     const isEligible = nisabAmount > 0 ? netAssets >= nisabAmount : netAssets > 0;
-    const zakatDue = isEligible && netAssets > 0 ? netAssets * (this.zakatRate / 100) : 0;
+    const zakatDue = isEligible ? this.totalCardZakatPayable + this.liabilityZakatAdjustment : 0;
     const shortfall = nisabAmount > 0 ? Math.max(0, nisabAmount - netAssets) : 0;
 
     this.result = {
@@ -113,8 +114,7 @@ export class ZakatCalculatorComponent {
   get totalGeneralLiabilities(): number {
     return this.getNumber(this.generalLiabilitiesFriends)
       + this.getNumber(this.generalLiabilitiesBanks)
-      + this.getNumber(this.generalLiabilitiesTax)
-      + this.getNumber(this.otherLiabilities);
+      + this.getNumber(this.generalLiabilitiesTax);
   }
 
   get businessTotalStockValue(): number {
@@ -187,15 +187,47 @@ export class ZakatCalculatorComponent {
   }
 
   get partnershipNetWorth(): number {
-    return this.getNumber(this.partnershipCapital) + this.getNumber(this.partnershipProfitShare) - this.getNumber(this.businessPayables);
+    return this.getNumber(this.partnershipCapital)
+      + this.getNumber(this.partnershipLoansAdvanced)
+      + this.getNumber(this.partnershipProfitShare)
+      - this.getNumber(this.partnershipWithdrawals);
   }
 
   get partnershipZakat(): number {
     return this.partnershipNetWorth * 0.025;
   }
 
+  get agriculturalTotalProduce(): number {
+    return this.getNumber(this.agriculturalProduce)
+      + this.getNumber(this.agriculturalArtificialIrrigationProduce)
+      + this.getNumber(this.agriculturalMixedIrrigationProduce);
+  }
+
+  get agriculturalZakat(): number {
+    return (this.getNumber(this.agriculturalProduce) * 0.10)
+      + (this.getNumber(this.agriculturalArtificialIrrigationProduce) * 0.05)
+      + (this.getNumber(this.agriculturalMixedIrrigationProduce) * 0.075);
+  }
+
   get livestockZakat(): number {
     return this.getNumber(this.livestockValue) / 40;
+  }
+
+  get totalCardZakatPayable(): number {
+    return this.goldSectionZakat
+      + this.preciousStonesZakat
+      + this.silverSectionZakat
+      + this.cashSectionZakat
+      + this.investmentsSectionZakat
+      + this.landedPropertyZakat
+      + this.businessZakat
+      + this.partnershipZakat
+      + this.agriculturalZakat
+      + this.livestockZakat;
+  }
+
+  get liabilityZakatAdjustment(): number {
+    return this.totalGeneralLiabilities * -0.0275;
   }
 
   get activePopup(): { title: string; body: string[] } | null {
@@ -291,14 +323,13 @@ export class ZakatCalculatorComponent {
       'Landed Property': this.formatCurrency(this.getNumber(this.landedProperty)),
       'Business Stock': this.formatCurrency(this.businessTotalStockValue),
       'Partnership': this.formatCurrency(this.partnershipNetWorth),
-      'Agricultural Produce': this.formatCurrency(this.getNumber(this.agriculturalProduce)),
+      'Agricultural Produce': this.formatCurrency(this.agriculturalTotalProduce),
       'Livestock': this.formatCurrency(this.getNumber(this.livestockValue)),
       '': '',
       'LIABILITIES': '',
       'Friends/Relatives': this.formatCurrency(this.getNumber(this.generalLiabilitiesFriends)),
       'Banks/Institutions': this.formatCurrency(this.getNumber(this.generalLiabilitiesBanks)),
       'Tax': this.formatCurrency(this.getNumber(this.generalLiabilitiesTax)),
-      'Other Liabilities': this.formatCurrency(this.getNumber(this.otherLiabilities)),
       '': '',
       'ZAKAT CALCULATION': '',
       'Total Assets': this.formatCurrency(this.result.totalAssets),
@@ -369,7 +400,7 @@ export class ZakatCalculatorComponent {
     addRow('Landed Property', this.formatCurrency(this.getNumber(this.landedProperty)));
     addRow('Business Stock', this.formatCurrency(this.businessTotalStockValue));
     addRow('Partnership', this.formatCurrency(this.partnershipNetWorth));
-    addRow('Agricultural Produce', this.formatCurrency(this.getNumber(this.agriculturalProduce)));
+    addRow('Agricultural Produce', this.formatCurrency(this.agriculturalTotalProduce));
     addRow('Livestock', this.formatCurrency(this.getNumber(this.livestockValue)));
     yPosition += 2;
 
@@ -378,7 +409,6 @@ export class ZakatCalculatorComponent {
     addRow('Friends/Relatives', this.formatCurrency(this.getNumber(this.generalLiabilitiesFriends)));
     addRow('Banks/Institutions', this.formatCurrency(this.getNumber(this.generalLiabilitiesBanks)));
     addRow('Tax', this.formatCurrency(this.getNumber(this.generalLiabilitiesTax)));
-    addRow('Other Liabilities', this.formatCurrency(this.getNumber(this.otherLiabilities)));
     yPosition += 2;
 
     // Summary
