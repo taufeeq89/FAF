@@ -34,9 +34,11 @@ export class ZakatCalculatorComponent {
   privateInvestments = 0;
   otherWealth = 0;
   landedProperty = 0;
-  businessStockValue = 0;
+  businessSaleableStock = 0;
+  businessDamagedStock = 0;
   businessReceivables = 0;
   businessPayables = 0;
+  businessBadDebts = 0;
   partnershipCapital = 0;
   partnershipProfitShare = 0;
   agriculturalProduce = 0;
@@ -76,9 +78,7 @@ export class ZakatCalculatorComponent {
       + this.getNumber(this.privateInvestments)
       + this.getNumber(this.otherWealth)
       + this.getNumber(this.landedProperty)
-      + this.getNumber(this.businessStockValue)
-      + this.getNumber(this.businessReceivables)
-      - this.getNumber(this.businessPayables)
+      + this.businessTotalStockValue
       + this.getNumber(this.partnershipCapital)
       + this.getNumber(this.partnershipProfitShare)
       + this.getNumber(this.agriculturalProduce)
@@ -91,8 +91,8 @@ export class ZakatCalculatorComponent {
 
     const netAssets = totalAssets - totalLiabilities;
     const nisabAmount = this.getNumber(this.nisab);
-    const isEligible = netAssets >= nisabAmount && nisabAmount > 0;
-    const zakatDue = isEligible ? netAssets * (this.zakatRate / 100) : 0;
+    const isEligible = nisabAmount > 0 ? netAssets >= nisabAmount : netAssets > 0;
+    const zakatDue = isEligible && netAssets > 0 ? netAssets * (this.zakatRate / 100) : 0;
     const shortfall = nisabAmount > 0 ? Math.max(0, nisabAmount - netAssets) : 0;
 
     this.result = {
@@ -109,6 +109,14 @@ export class ZakatCalculatorComponent {
       + this.getNumber(this.generalLiabilitiesBanks)
       + this.getNumber(this.generalLiabilitiesTax)
       + this.getNumber(this.otherLiabilities);
+  }
+
+  get businessTotalStockValue(): number {
+    return this.getNumber(this.businessSaleableStock)
+      + this.getNumber(this.businessDamagedStock)
+      + this.getNumber(this.businessReceivables)
+      - this.getNumber(this.businessPayables)
+      - this.getNumber(this.businessBadDebts);
   }
 
   private getNumber(value: number | string | null | undefined): number {

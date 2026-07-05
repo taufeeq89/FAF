@@ -17,8 +17,14 @@
     <div class="table-row header">
       <span>Description</span>
       <span>Weight in gms</span>
-      <span>Price/Gm</span>
-      <span>Estimated Value</span>
+      <span class="tooltip-label">Price/Gm
+        <span class="tooltip-trigger">?</span>
+        <span class="tooltip-text">You will need to find out the market price as of today and insert the same in Price/Gm.</span>
+      </span>
+      <span class="tooltip-label">Estimated Value
+        <span class="tooltip-trigger">?</span>
+        <span class="tooltip-text">These are just notional Values, please check current market price and insert it here.</span>
+      </span>
     </div>
     <div class="table-row">
       <span>24 Carat Gold/Jewellery</span>
@@ -65,8 +71,14 @@
     <div class="table-row header">
       <span>Description</span>
       <span>Weight in gms</span>
-      <span>Price/Gm</span>
-      <span>Estimated Value</span>
+      <span class="tooltip-label">Price/Gm
+        <span class="tooltip-trigger">?</span>
+        <span class="tooltip-text">Please find out the value of Silver per Gm and insert it in Price/Gm Column.</span>
+      </span>
+      <span class="tooltip-label">Estimated Value
+        <span class="tooltip-trigger">?</span>
+        <span class="tooltip-text">These are just notional Values, please check current market price and insert it here.</span>
+      </span>
     </div>
     <div class="table-row">
       <span>Silver</span>
@@ -99,7 +111,10 @@
       <h3>5 ZAKAT ON LOANS / INVESTMENTS / FUNDS / SHARES, ETC</h3>
       <button class="info-btn" title="Instructions" (click)="openPopup('investments')">i</button>
     </div>
-    <label>Loans Receivable from Friends and Relatives</label>
+    <label class="tooltip-label">Loans Receivable from Friends and Relatives
+      <span class="tooltip-trigger">?</span>
+      <span class="tooltip-text">List out your entire sources of wealth. Even money receivable given as a loan to someone is to be calculated for zakat purposes.</span>
+    </label>
     <input type="number" [(ngModel)]="loansReceivable" />
 
     <label>Investment in Govt Bonds</label>
@@ -135,47 +150,89 @@
 
   <div class="panel">
     <div class="panel-header">
-      <h3>7 ZAKAT ON BUSINESS STOCK / RECEIVABLES</h3>
+      <h3>7 ZAKAT ON BUSINESS</h3>
       <button class="info-btn" title="Instructions" (click)="openPopup('business')">i</button>
     </div>
-    <label>Stock-in-trade at cost / market value</label>
-    <input type="number" [(ngModel)]="businessStockValue" />
+    <label>Value of Saleable Stock</label>
+    <input type="number" [(ngModel)]="businessSaleableStock" />
 
-    <label>Receivables / bills receivable</label>
+    <label>Value of Damaged / Dead Stock</label>
+    <input type="number" [(ngModel)]="businessDamagedStock" />
+
+    <label>Amount Receivable from Credit Sales</label>
     <input type="number" [(ngModel)]="businessReceivables" />
 
-    <label>Payables / suppliers / loans against stock</label>
+    <label class="less-label">LESS: Amount Payable to Suppliers (Credit taken from suppliers for stocking goods)</label>
     <input type="number" [(ngModel)]="businessPayables" />
+
+    <label class="less-label">LESS: Bad Debts</label>
+    <input type="number" [(ngModel)]="businessBadDebts" />
+
+    <div class="stock-total-row">
+      <span>TOTAL VALUE OF STOCK</span>
+      <strong class="stock-total-value">{{ formatCurrency(businessTotalStockValue) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
     <div class="panel-header">
-      <h3>8 ZAKAT ON PARTNERSHIP FIRMS</h3>
+      <h3>8 ZAKAT ON SHARE IN PARTNERSHIP FIRMS</h3>
       <button class="info-btn" title="Instructions" (click)="openPopup('partnership')">i</button>
     </div>
-    <label>Capital / loan account balance</label>
+    <label class="tooltip-label">Capital Balance as per Last balance Sheet
+      <span class="tooltip-trigger">?</span>
+      <span class="tooltip-text">If your company as a whole pays zakat then you need not calculate personal zakat. If not then you have to see your personal share in the firm and pay zakat on that percentage.</span>
+    </label>
     <input type="number" [(ngModel)]="partnershipCapital" />
 
-    <label>Estimated share of profit to date</label>
+    <label>Loans Advanced by you to the Firm as of Date</label>
+    <input type="number" [(ngModel)]="businessReceivables" />
+
+    <label class="less-label">LESS: Withdrawals made by you during the current Year.</label>
+    <input type="number" [(ngModel)]="businessPayables" />
+
+    <label>Accumulated Profit from the date of Balance Sheet to this Date (Estimate the Profit Value as it is difficult to get exact figures in the middle of an Accounting Year)</label>
     <input type="number" [(ngModel)]="partnershipProfitShare" />
+
+    <div class="stock-total-row">
+      <span>NETT TOTAL WORTH CALCULATED</span>
+      <strong class="stock-total-value">{{ formatCurrency(partnershipCapital + partnershipProfitShare - businessPayables) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
     <div class="panel-header">
-      <h3>9 ZAKAT ON AGRICULTURAL PRODUCT</h3>
+      <h3>9 ZAKAT ON AGRICULTURAL PRODUCE</h3>
       <button class="info-btn" title="Instructions" (click)="openPopup('agricultural')">i</button>
     </div>
-    <label>Estimated value of crop / produce</label>
+    <label>Produce Dependent on Rain Water - @ 10% of product (crop) in Value or Kind</label>
     <input type="number" [(ngModel)]="agriculturalProduce" />
+
+    <label>Produce totally dependent on Artificial Irrigation like Canal, Tank, Borewell, etc. - @ 5% of the Produce (crop) in Value or in Kind</label>
+    <input type="number" />
+
+    <label>Produce dependent Partially on Rain Water and Partially on Artificial Irrigation - 7.5% of the Produce Value or in Kind</label>
+    <input type="number" />
   </div>
 
   <div class="panel">
     <div class="panel-header">
-      <h3>10 ZAKAT ON LIVESTOCK</h3>
+      <h3>10 ZAKAT ON ANIMALS & POULTRY & FISH FARMING</h3>
       <button class="info-btn" title="Instructions" (click)="openPopup('livestock')">i</button>
     </div>
-    <label>Estimated value of livestock</label>
+    <label class="tooltip-label">
+      Animals/ Birds more than 6 months Old - @ 1 Animal or Bird PER 40 either in Kind or Value of the same.
+      <span class="tooltip-trigger">?</span>
+      <span class="tooltip-text">
+        The calculation for Fish Farming and Poultry Birds is a little bit complicated. Pls contact your Local Aalim for the right calculations.
+      </span>
+    </label>
     <input type="number" [(ngModel)]="livestockValue" />
+
+    <div class="stock-total-row">
+      <span>Total Value</span>
+      <strong class="stock-total-value">{{ formatCurrency(livestockValue) }}</strong>
+    </div>
   </div>
 
   <div class="panel colorful-panel">
