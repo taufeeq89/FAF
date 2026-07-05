@@ -2,6 +2,7 @@
   <button class="tab-button" [class.active]="activeTab === 'home'" (click)="selectTab('home')">Home</button>
   <button class="tab-button" [class.active]="activeTab === 'profile'" (click)="selectTab('profile')">Profile</button>
   <button class="tab-button" [class.active]="activeTab === 'stock'" (click)="selectTab('stock')">Stock</button>
+  <button class="tab-button" [class.active]="activeTab === 'zakat'" (click)="selectTab('zakat')">Zakat</button>
   <button class="tab-button" [class.active]="activeTab === 'settings'" (click)="selectTab('settings')">Settings</button>
 </div>
 
@@ -29,6 +30,11 @@
 
     <div *ngIf="activeTab === 'stock'">
       <app-fair-value-calculator></app-fair-value-calculator>
+      <app-fair-value-detailed></app-fair-value-detailed>
+    </div>
+
+    <div *ngIf="activeTab === 'zakat'">
+      <app-zakat-calculator></app-zakat-calculator>
     </div>
 
     <div *ngIf="activeTab === 'settings'">

@@ -1,0 +1,52 @@
+<section class="detailed-page">
+  <div class="lookup-card">
+    <div class="lookup-top">
+      <input type="text" [(ngModel)]="ticker" placeholder="Enter ticker, e.g. BSX" />
+      <button (click)="lookupStock()" [disabled]="loadingStock">{{ loadingStock ? 'Loading…' : 'Lookup' }}</button>
+    </div>
+
+    <div *ngIf="stockError" class="alert error">{{ stockError }}</div>
+
+    <div *ngIf="stockResult" class="company-card">
+      <div class="company-header">
+        <div class="company-title">
+          <h2>{{ stockResult.companyName || ticker }}</h2>
+          <div class="sub">{{ stockResult.industry || stockResult.sector || '' }}</div>
+        </div>
+        <div class="price">{{ formatCurrency(stockResult.price) }}</div>
+      </div>
+
+      <div class="warning" *ngIf="stockResult.warnings?.length">
+        <strong>Notice:</strong>
+        <div *ngFor="let w of stockResult.warnings">{{ w }}</div>
+      </div>
+
+      <div class="inputs-grid">
+        <div><label>EPS (TTM)</label><div class="val">{{ formatNumber(stockResult.eps,2) }}</div></div>
+        <div><label>Growth rate</label><div class="val">{{ formatPercent(stockResult.growthRate,1) }}</div></div>
+        <div><label>Terminal growth</label><div class="val">{{ formatPercent(stockResult.terminalGrowth,1) }}</div></div>
+        <div><label>Exit P/E</label><div class="val">{{ formatNumber(stockResult.exitPE,1) }}</div></div>
+        <div><label>Discount/WACC</label><div class="val">{{ formatPercent(stockResult.wacc,1) }}</div></div>
+        <div><label>Intrinsic value</label><div class="val big">{{ formatCurrency(stockResult.intrinsicValue) }}</div></div>
+      </div>
+
+      <div class="result-box">
+        <div class="status success">Potentially undervalued</div>
+        <div class="tiles">
+          <div class="tile">
+            <div class="title">Fair value</div>
+            <div class="num">{{ formatCurrency(stockResult.intrinsicValue) }}</div>
+          </div>
+          <div class="tile">
+            <div class="title">Margin of safety</div>
+            <div class="num">{{ premiumDiscount() }}</div>
+          </div>
+          <div class="tile">
+            <div class="title">Upside</div>
+            <div class="num">{{ formatPercent(((stockResult.intrinsicValue - stockResult.price)/stockResult.price)*100 || 0,1) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

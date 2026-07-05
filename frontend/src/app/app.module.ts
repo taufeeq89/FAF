@@ -7,9 +7,11 @@ import { AuthService } from './auth.service';
 import { HttpClientModule } from '@angular/common/http';
 import { StockService } from './stock.service';
 import { FairValueCalculatorComponent } from './fair-value-calculator.component';
+import { FairValueDetailedComponent } from './fair-value-detailed.component';
+import { ZakatCalculatorComponent } from './zakat-calculator.component';
 
 @NgModule({
-  declarations: [AppComponent, FairValueCalculatorComponent],
+  declarations: [AppComponent, FairValueCalculatorComponent, FairValueDetailedComponent, ZakatCalculatorComponent],
   imports: [BrowserModule, FormsModule, HttpClientModule, AppRoutingModule],
   providers: [AuthService, StockService],
   bootstrap: [AppComponent]

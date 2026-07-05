@@ -1,0 +1,23 @@
+:host { display:block; color:#0f172a }
+.detailed-page { max-width: 900px; margin: 18px auto; padding: 18px; }
+.lookup-card { background:white; border-radius:18px; border:1px solid #e6eef7; padding:20px; box-shadow:0 20px 40px rgba(15,23,42,0.06); }
+.lookup-top { display:flex; gap:12px; margin-bottom:12px }
+.lookup-top input { flex:1; padding:12px 14px; border-radius:12px; border:1px solid #d1dbe7 }
+.lookup-top button { padding:10px 16px; border-radius:12px; border:none; background:#2563eb; color:white; cursor:pointer }
+.alert.error { background:#fff4f4; border:1px solid #fed7d7; padding:10px; border-radius:8px; color:#7f1d1d }
+.company-card { margin-top:12px }
+.company-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eef2f7; padding-bottom:12px }
+.company-title h2 { margin:0; font-size:1.25rem }
+.company-title .sub { color:#64748b; font-size:0.9rem }
+.price { font-weight:700; font-size:1.1rem }
+.warning { background:#fff9e6; border:1px solid #fbe7a6; padding:10px; margin:12px 0; border-radius:8px }
+.inputs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px }
+.inputs-grid label { color:#64748b; display:block; font-size:0.85rem }
+.val { font-weight:700; margin-top:6px }
+.val.big { font-size:1.15rem }
+.result-box { margin-top:18px; background:#f8fafc; border-radius:12px; padding:14px; border:1px solid #e6eef7 }
+.status.success { background:#ecfdf5; border-left:4px solid #34d399; padding:8px 10px; border-radius:6px; color:#065f46; font-weight:600 }
+.tiles { display:flex; gap:12px; margin-top:12px }
+.tile { flex:1; background:white; border-radius:10px; padding:12px; text-align:center; border:1px solid #e6eef7 }
+.tile .title { color:#64748b; font-size:0.85rem }
+.tile .num { font-weight:700; margin-top:6px }

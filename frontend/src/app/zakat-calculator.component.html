@@ -1,0 +1,239 @@
+<section class="zakat-page">
+  <div class="header-block">
+    <h2>Zakat Calculator</h2>
+    <p>(Use Only YELLOW cells to fill Values. Please refer to the Appendix Sheet for more explanations on Each Section)</p>
+  </div>
+
+  <div class="sub-tab-bar">
+    <button class="sub-tab" (click)="openPopup('summary')">Summary</button>
+    <button class="sub-tab" (click)="openPopup('instructions')">Instructions</button>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>1 ZAKAT ON GOLD</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('gold')">i</button>
+    </div>
+    <div class="table-row header">
+      <span>Description</span>
+      <span>Weight in gms</span>
+      <span>Price/Gm</span>
+      <span>Estimated Value</span>
+    </div>
+    <div class="table-row">
+      <span>24 Carat Gold/Jewellery</span>
+      <input type="number" [(ngModel)]="gold24Weight" placeholder="gms" />
+      <input type="number" [(ngModel)]="gold24PricePerGram" placeholder="price/gm" />
+      <div>{{ formatCurrency(gold24Estimated) }}</div>
+    </div>
+    <div class="table-row">
+      <span>22 Carat Gold/Jewellery</span>
+      <input type="number" [(ngModel)]="gold22Weight" placeholder="gms" />
+      <input type="number" [(ngModel)]="gold22PricePerGram" placeholder="price/gm" />
+      <div>{{ formatCurrency(gold22Estimated) }}</div>
+    </div>
+    <div class="table-row">
+      <span>18 Carat Gold/Jewellery</span>
+      <input type="number" [(ngModel)]="gold18Weight" placeholder="gms" />
+      <input type="number" [(ngModel)]="gold18PricePerGram" placeholder="price/gm" />
+      <div>{{ formatCurrency(gold18Estimated) }}</div>
+    </div>
+    <div class="table-row">
+      <span>Other Gold Valuables (Pls insert the Current Estimated Value)</span>
+      <div></div>
+      <div></div>
+      <input type="number" [(ngModel)]="otherGold" placeholder="value" />
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>2 ZAKAT ON PRECIOUS STONES</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('precious')">i</button>
+    </div>
+    <p>Calculate the net Market Value of the Precious stones like Diamonds, Rubies, Etc. and add them to the Estimated Value Column</p>
+    <label>Estimated value</label>
+    <input type="number" [(ngModel)]="preciousStones" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>3 ZAKAT ON SILVER</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('silver')">i</button>
+    </div>
+    <p>Include Household Silver Utensils, Artefacts, and Jewellery. For Utensils, usually the silver is 90% pure so take 90% of the total weight</p>
+    <div class="table-row header">
+      <span>Description</span>
+      <span>Weight in gms</span>
+      <span>Price/Gm</span>
+      <span>Estimated Value</span>
+    </div>
+    <div class="table-row">
+      <span>Silver</span>
+      <input type="number" [(ngModel)]="silverWeight" placeholder="gms" />
+      <input type="number" [(ngModel)]="silverPricePerGram" placeholder="price/gm" />
+      <div>{{ formatCurrency(silverEstimated) }}</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>4 ZAKAT ON CASH IN HAND / BANK</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('cash')">i</button>
+    </div>
+    <label>Cash in Hand</label>
+    <input type="number" [(ngModel)]="cashInHand" />
+
+    <label>Cash in Bank in Savings Accounts</label>
+    <input type="number" [(ngModel)]="cashInSavings" />
+
+    <label>Cash in Bank in Current Accounts</label>
+    <input type="number" [(ngModel)]="cashInCurrent" />
+
+    <label>Cash held in Fixed Deposits</label>
+    <input type="number" [(ngModel)]="cashInFixedDeposits" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>5 ZAKAT ON LOANS / INVESTMENTS / FUNDS / SHARES, ETC</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('investments')">i</button>
+    </div>
+    <label>Loans Receivable from Friends and Relatives</label>
+    <input type="number" [(ngModel)]="loansReceivable" />
+
+    <label>Investment in Govt Bonds</label>
+    <input type="number" [(ngModel)]="govtBonds" />
+
+    <label>Provident Fund Contribution to date</label>
+    <input type="number" [(ngModel)]="providentFund" />
+
+    <label>Insurance Premiums including bonus up to date</label>
+    <input type="number" [(ngModel)]="insurancePremiums" />
+
+    <label>Value of Shares (stocks) including Dividends. Take their market value on the date of calculation</label>
+    <input type="number" [(ngModel)]="sharesAndDividends" />
+
+    <label>Government Security Deposits, ADRs, etc</label>
+    <input type="number" [(ngModel)]="securityDeposits" />
+
+    <label>Investment in Private Chits, Funds, etc</label>
+    <input type="number" [(ngModel)]="privateInvestments" />
+
+    <label>Other Sources of Wealth</label>
+    <input type="number" [(ngModel)]="otherWealth" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>6 ZAKAT ON LANDED PROPERTY</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('landed')">i</button>
+    </div>
+    <label>Landed Property held as an Investment / Business (Estimate the current Market Value)</label>
+    <input type="number" [(ngModel)]="landedProperty" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>7 ZAKAT ON BUSINESS STOCK / RECEIVABLES</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('business')">i</button>
+    </div>
+    <label>Stock-in-trade at cost / market value</label>
+    <input type="number" [(ngModel)]="businessStockValue" />
+
+    <label>Receivables / bills receivable</label>
+    <input type="number" [(ngModel)]="businessReceivables" />
+
+    <label>Payables / suppliers / loans against stock</label>
+    <input type="number" [(ngModel)]="businessPayables" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>8 ZAKAT ON PARTNERSHIP FIRMS</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('partnership')">i</button>
+    </div>
+    <label>Capital / loan account balance</label>
+    <input type="number" [(ngModel)]="partnershipCapital" />
+
+    <label>Estimated share of profit to date</label>
+    <input type="number" [(ngModel)]="partnershipProfitShare" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>9 ZAKAT ON AGRICULTURAL PRODUCT</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('agricultural')">i</button>
+    </div>
+    <label>Estimated value of crop / produce</label>
+    <input type="number" [(ngModel)]="agriculturalProduce" />
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h3>10 ZAKAT ON LIVESTOCK</h3>
+      <button class="info-btn" title="Instructions" (click)="openPopup('livestock')">i</button>
+    </div>
+    <label>Estimated value of livestock</label>
+    <input type="number" [(ngModel)]="livestockValue" />
+  </div>
+
+  <div class="panel colorful-panel">
+    <div class="panel-header">
+      <h3>Liabilities and Total Zakat Payable</h3>
+    </div>
+
+    <div class="liabilities-grid">
+      <label>Loans taken from Friends / Relatives</label>
+      <input type="number" [(ngModel)]="generalLiabilitiesFriends" />
+
+      <label>Loans taken from Banks / Institutions</label>
+      <input type="number" [(ngModel)]="generalLiabilitiesBanks" />
+
+      <label>Income Tax / Wealth Tax Payable</label>
+      <input type="number" [(ngModel)]="generalLiabilitiesTax" />
+
+      <label>Other general liabilities</label>
+      <input type="number" [(ngModel)]="otherLiabilities" />
+    </div>
+
+    <div class="highlight-row">
+      <span>Total Liabilities</span>
+      <strong>{{ formatCurrency(totalGeneralLiabilities) }}</strong>
+    </div>
+
+    <div class="summary-grid">
+      <label>Nisab</label>
+      <input type="number" [(ngModel)]="nisab" />
+
+      <label>Zakat rate (%)</label>
+      <input type="number" [(ngModel)]="zakatRate" />
+    </div>
+
+    <button class="primary-button" (click)="calculateZakat()">Calculate Zakat</button>
+
+    <div class="summary colorful-summary" *ngIf="result">
+      <div class="summary-row"><span>Total assets</span><strong>{{ formatCurrency(result.totalAssets) }}</strong></div>
+      <div class="summary-row"><span>Net assets</span><strong>{{ formatCurrency(result.netAssets) }}</strong></div>
+      <div class="summary-row"><span>Zakat due</span><strong>{{ formatCurrency(result.zakatDue) }}</strong></div>
+      <div class="summary-row"><span>Eligibility</span><strong>{{ result.isEligible ? 'Eligible' : 'Not eligible' }}</strong></div>
+      <div class="summary-row" *ngIf="!result.isEligible"><span>Shortfall</span><strong>{{ formatCurrency(result.shortfall) }}</strong></div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <strong>FOOTNOTE:</strong> Please note that interest in any form is Haram and strictly prohibited. So please stay away from taking Loans on Interest AND collection of Interests from any body or institution.
+  </div>
+
+  <div class="popup-backdrop" *ngIf="popupType && activePopup" (click)="closePopup()">
+    <div class="popup-card" #popupCard (click)="$event.stopPropagation()" role="dialog" aria-modal="true" [attr.aria-label]="activePopup.title">
+      <div class="popup-header">
+        <h3>{{ activePopup.title }}</h3>
+        <button class="popup-close" (click)="closePopup()" aria-label="Close instructions">×</button>
+      </div>
+      <div class="popup-body">
+        <p *ngFor="let line of activePopup.body">{{ line }}</p>
+      </div>
+    </div>
+  </div>
+</section>
