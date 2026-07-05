@@ -28,27 +28,33 @@
     </div>
     <div class="table-row">
       <span>24 Carat Gold/Jewellery</span>
-      <input type="number" [(ngModel)]="gold24Weight" placeholder="gms" />
-      <input type="number" [(ngModel)]="gold24PricePerGram" placeholder="price/gm" />
+      <input type="number" [(ngModel)]="gold24Weight" (ngModelChange)="onValueChange()" placeholder="gms" />
+      <input type="number" [(ngModel)]="gold24PricePerGram" (ngModelChange)="onValueChange()" placeholder="price/gm" />
       <div>{{ formatCurrency(gold24Estimated) }}</div>
     </div>
     <div class="table-row">
       <span>22 Carat Gold/Jewellery</span>
-      <input type="number" [(ngModel)]="gold22Weight" placeholder="gms" />
-      <input type="number" [(ngModel)]="gold22PricePerGram" placeholder="price/gm" />
+      <input type="number" [(ngModel)]="gold22Weight" (ngModelChange)="onValueChange()" placeholder="gms" />
+      <input type="number" [(ngModel)]="gold22PricePerGram" (ngModelChange)="onValueChange()" placeholder="price/gm" />
       <div>{{ formatCurrency(gold22Estimated) }}</div>
     </div>
     <div class="table-row">
       <span>18 Carat Gold/Jewellery</span>
-      <input type="number" [(ngModel)]="gold18Weight" placeholder="gms" />
-      <input type="number" [(ngModel)]="gold18PricePerGram" placeholder="price/gm" />
+      <input type="number" [(ngModel)]="gold18Weight" (ngModelChange)="onValueChange()" placeholder="gms" />
+      <input type="number" [(ngModel)]="gold18PricePerGram" (ngModelChange)="onValueChange()" placeholder="price/gm" />
       <div>{{ formatCurrency(gold18Estimated) }}</div>
     </div>
     <div class="table-row">
       <span>Other Gold Valuables (Pls insert the Current Estimated Value)</span>
       <div></div>
       <div></div>
-      <input type="number" [(ngModel)]="otherGold" placeholder="value" />
+      <input type="number" [(ngModel)]="otherGold" (ngModelChange)="onValueChange()" placeholder="value" />
+    </div>
+    <div class="table-row zakat-row">
+      <span><strong>Zakat Payable</strong></span>
+      <div></div>
+      <div></div>
+      <strong>{{ formatCurrency(goldSectionZakat) }}</strong>
     </div>
   </div>
 
@@ -59,7 +65,11 @@
     </div>
     <p>Calculate the net Market Value of the Precious stones like Diamonds, Rubies, Etc. and add them to the Estimated Value Column</p>
     <label>Estimated value</label>
-    <input type="number" [(ngModel)]="preciousStones" />
+    <input type="number" [(ngModel)]="preciousStones" (ngModelChange)="onValueChange()" />
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(preciousStonesZakat) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
@@ -82,9 +92,15 @@
     </div>
     <div class="table-row">
       <span>Silver</span>
-      <input type="number" [(ngModel)]="silverWeight" placeholder="gms" />
-      <input type="number" [(ngModel)]="silverPricePerGram" placeholder="price/gm" />
+      <input type="number" [(ngModel)]="silverWeight" (ngModelChange)="onValueChange()" placeholder="gms" />
+      <input type="number" [(ngModel)]="silverPricePerGram" (ngModelChange)="onValueChange()" placeholder="price/gm" />
       <div>{{ formatCurrency(silverEstimated) }}</div>
+    </div>
+    <div class="table-row zakat-row">
+      <span><strong>Zakat Payable</strong></span>
+      <div></div>
+      <div></div>
+      <strong>{{ formatCurrency(silverSectionZakat) }}</strong>
     </div>
   </div>
 
@@ -94,16 +110,20 @@
       <button class="info-btn" title="Instructions" (click)="openPopup('cash')">i</button>
     </div>
     <label>Cash in Hand</label>
-    <input type="number" [(ngModel)]="cashInHand" />
+    <input type="number" [(ngModel)]="cashInHand" (ngModelChange)="onValueChange()" />
 
     <label>Cash in Bank in Savings Accounts</label>
-    <input type="number" [(ngModel)]="cashInSavings" />
+    <input type="number" [(ngModel)]="cashInSavings" (ngModelChange)="onValueChange()" />
 
     <label>Cash in Bank in Current Accounts</label>
-    <input type="number" [(ngModel)]="cashInCurrent" />
+    <input type="number" [(ngModel)]="cashInCurrent" (ngModelChange)="onValueChange()" />
 
     <label>Cash held in Fixed Deposits</label>
-    <input type="number" [(ngModel)]="cashInFixedDeposits" />
+    <input type="number" [(ngModel)]="cashInFixedDeposits" (ngModelChange)="onValueChange()" />
+    <div class="summary-row zakat-summary-row">
+      <span><strong>Zakat Payable</strong></span>
+      <strong>{{ formatCurrency(cashSectionZakat) }}</strong>
+    </div>
   </div>
 
   <div class="panel">
@@ -115,28 +135,28 @@
       <span class="tooltip-trigger">?</span>
       <span class="tooltip-text">List out your entire sources of wealth. Even money receivable given as a loan to someone is to be calculated for zakat purposes.</span>
     </label>
-    <input type="number" [(ngModel)]="loansReceivable" />
+    <input type="number" [(ngModel)]="loansReceivable" (ngModelChange)="onValueChange()" />
 
     <label>Investment in Govt Bonds</label>
-    <input type="number" [(ngModel)]="govtBonds" />
+    <input type="number" [(ngModel)]="govtBonds" (ngModelChange)="onValueChange()" />
 
     <label>Provident Fund Contribution to date</label>
-    <input type="number" [(ngModel)]="providentFund" />
+    <input type="number" [(ngModel)]="providentFund" (ngModelChange)="onValueChange()" />
 
     <label>Insurance Premiums including bonus up to date</label>
-    <input type="number" [(ngModel)]="insurancePremiums" />
+    <input type="number" [(ngModel)]="insurancePremiums" (ngModelChange)="onValueChange()" />
 
     <label>Value of Shares (stocks) including Dividends. Take their market value on the date of calculation</label>
-    <input type="number" [(ngModel)]="sharesAndDividends" />
+    <input type="number" [(ngModel)]="sharesAndDividends" (ngModelChange)="onValueChange()" />
 
     <label>Government Security Deposits, ADRs, etc</label>
-    <input type="number" [(ngModel)]="securityDeposits" />
+    <input type="number" [(ngModel)]="securityDeposits" (ngModelChange)="onValueChange()" />
 
     <label>Investment in Private Chits, Funds, etc</label>
-    <input type="number" [(ngModel)]="privateInvestments" />
+    <input type="number" [(ngModel)]="privateInvestments" (ngModelChange)="onValueChange()" />
 
     <label>Other Sources of Wealth</label>
-    <input type="number" [(ngModel)]="otherWealth" />
+    <input type="number" [(ngModel)]="otherWealth" (ngModelChange)="onValueChange()" />
   </div>
 
   <div class="panel">
@@ -145,7 +165,7 @@
       <button class="info-btn" title="Instructions" (click)="openPopup('landed')">i</button>
     </div>
     <label>Landed Property held as an Investment / Business (Estimate the current Market Value)</label>
-    <input type="number" [(ngModel)]="landedProperty" />
+    <input type="number" [(ngModel)]="landedProperty" (ngModelChange)="onValueChange()" />
   </div>
 
   <div class="panel">
@@ -154,19 +174,19 @@
       <button class="info-btn" title="Instructions" (click)="openPopup('business')">i</button>
     </div>
     <label>Value of Saleable Stock</label>
-    <input type="number" [(ngModel)]="businessSaleableStock" />
+    <input type="number" [(ngModel)]="businessSaleableStock" (ngModelChange)="onValueChange()" />
 
     <label>Value of Damaged / Dead Stock</label>
-    <input type="number" [(ngModel)]="businessDamagedStock" />
+    <input type="number" [(ngModel)]="businessDamagedStock" (ngModelChange)="onValueChange()" />
 
     <label>Amount Receivable from Credit Sales</label>
-    <input type="number" [(ngModel)]="businessReceivables" />
+    <input type="number" [(ngModel)]="businessReceivables" (ngModelChange)="onValueChange()" />
 
     <label class="less-label">LESS: Amount Payable to Suppliers (Credit taken from suppliers for stocking goods)</label>
-    <input type="number" [(ngModel)]="businessPayables" />
+    <input type="number" [(ngModel)]="businessPayables" (ngModelChange)="onValueChange()" />
 
     <label class="less-label">LESS: Bad Debts</label>
-    <input type="number" [(ngModel)]="businessBadDebts" />
+    <input type="number" [(ngModel)]="businessBadDebts" (ngModelChange)="onValueChange()" />
 
     <div class="stock-total-row">
       <span>TOTAL VALUE OF STOCK</span>
@@ -183,16 +203,16 @@
       <span class="tooltip-trigger">?</span>
       <span class="tooltip-text">If your company as a whole pays zakat then you need not calculate personal zakat. If not then you have to see your personal share in the firm and pay zakat on that percentage.</span>
     </label>
-    <input type="number" [(ngModel)]="partnershipCapital" />
+    <input type="number" [(ngModel)]="partnershipCapital" (ngModelChange)="onValueChange()" />
 
     <label>Loans Advanced by you to the Firm as of Date</label>
-    <input type="number" [(ngModel)]="businessReceivables" />
+    <input type="number" [(ngModel)]="businessReceivables" (ngModelChange)="onValueChange()" />
 
     <label class="less-label">LESS: Withdrawals made by you during the current Year.</label>
-    <input type="number" [(ngModel)]="businessPayables" />
+    <input type="number" [(ngModel)]="businessPayables" (ngModelChange)="onValueChange()" />
 
     <label>Accumulated Profit from the date of Balance Sheet to this Date (Estimate the Profit Value as it is difficult to get exact figures in the middle of an Accounting Year)</label>
-    <input type="number" [(ngModel)]="partnershipProfitShare" />
+    <input type="number" [(ngModel)]="partnershipProfitShare" (ngModelChange)="onValueChange()" />
 
     <div class="stock-total-row">
       <span>NETT TOTAL WORTH CALCULATED</span>
@@ -206,13 +226,13 @@
       <button class="info-btn" title="Instructions" (click)="openPopup('agricultural')">i</button>
     </div>
     <label>Produce Dependent on Rain Water - @ 10% of product (crop) in Value or Kind</label>
-    <input type="number" [(ngModel)]="agriculturalProduce" />
+    <input type="number" [(ngModel)]="agriculturalProduce" (ngModelChange)="onValueChange()" />
 
     <label>Produce totally dependent on Artificial Irrigation like Canal, Tank, Borewell, etc. - @ 5% of the Produce (crop) in Value or in Kind</label>
-    <input type="number" />
+    <input type="number" (ngModelChange)="onValueChange()" />
 
     <label>Produce dependent Partially on Rain Water and Partially on Artificial Irrigation - 7.5% of the Produce Value or in Kind</label>
-    <input type="number" />
+    <input type="number" (ngModelChange)="onValueChange()" />
   </div>
 
   <div class="panel">
@@ -227,7 +247,7 @@
         The calculation for Fish Farming and Poultry Birds is a little bit complicated. Pls contact your Local Aalim for the right calculations.
       </span>
     </label>
-    <input type="number" [(ngModel)]="livestockValue" />
+    <input type="number" [(ngModel)]="livestockValue" (ngModelChange)="onValueChange()" />
 
     <div class="stock-total-row">
       <span>Total Value</span>
@@ -242,16 +262,16 @@
 
     <div class="liabilities-grid">
       <label>Loans taken from Friends / Relatives</label>
-      <input type="number" [(ngModel)]="generalLiabilitiesFriends" />
+      <input type="number" [(ngModel)]="generalLiabilitiesFriends" (ngModelChange)="onValueChange()" />
 
       <label>Loans taken from Banks / Institutions</label>
-      <input type="number" [(ngModel)]="generalLiabilitiesBanks" />
+      <input type="number" [(ngModel)]="generalLiabilitiesBanks" (ngModelChange)="onValueChange()" />
 
       <label>Income Tax / Wealth Tax Payable</label>
-      <input type="number" [(ngModel)]="generalLiabilitiesTax" />
+      <input type="number" [(ngModel)]="generalLiabilitiesTax" (ngModelChange)="onValueChange()" />
 
       <label>Other general liabilities</label>
-      <input type="number" [(ngModel)]="otherLiabilities" />
+      <input type="number" [(ngModel)]="otherLiabilities" (ngModelChange)="onValueChange()" />
     </div>
 
     <div class="highlight-row">
@@ -261,13 +281,16 @@
 
     <div class="summary-grid">
       <label>Nisab</label>
-      <input type="number" [(ngModel)]="nisab" />
+      <input type="number" [(ngModel)]="nisab" (ngModelChange)="onValueChange()" />
 
       <label>Zakat rate (%)</label>
-      <input type="number" [(ngModel)]="zakatRate" />
+      <input type="number" [(ngModel)]="zakatRate" (ngModelChange)="onValueChange()" />
     </div>
 
-    <button class="primary-button" (click)="calculateZakat()">Calculate Zakat</button>
+    <div class="export-buttons">
+      <button class="export-btn export-pdf" (click)="exportToPDF()" title="Export to PDF">📄 Export to PDF</button>
+      <button class="export-btn export-csv" (click)="exportToCSV()" title="Export to CSV">📊 Export to CSV</button>
+    </div>
 
     <div class="summary colorful-summary" *ngIf="result">
       <div class="summary-row"><span>Total assets</span><strong>{{ formatCurrency(result.totalAssets) }}</strong></div>
