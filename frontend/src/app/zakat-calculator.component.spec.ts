@@ -1,5 +1,15 @@
 import { ZakatCalculatorComponent } from './zakat-calculator.component';
 
+class MockStockService {
+  saveZakatCalculation() {
+    return { subscribe: () => undefined } as any;
+  }
+}
+
+class MockAuthService {
+  auth$ = { subscribe: () => undefined } as any;
+}
+
 declare function describe(name: string, spec: () => void): void;
 declare function it(name: string, spec: () => void): void;
 declare function expect(actual: unknown): {
@@ -64,7 +74,7 @@ describe('ZakatCalculatorComponent Autofill', () => {
   }
 
   it('should auto-fill 100 on every tab and produce total zakath payable due 1061.75', () => {
-    const component = new ZakatCalculatorComponent();
+    const component = new ZakatCalculatorComponent(new MockStockService() as any, new MockAuthService() as any);
 
     fillAllTabsWith100(component);
     component.calculateZakat();

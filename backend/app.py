@@ -1,7 +1,13 @@
-from flask import Flask, jsonify, render_template
-from flask_cors import CORS
+import os
 from datetime import datetime
+from urllib.parse import urlencode
+
+from flask import Flask, jsonify, render_template, redirect, request
+from flask_cors import CORS
+import requests
 import yfinance as yf
+from dotenv import load_dotenv
+from pymongo import MongoClient
 
 # Import modules from our segregated ecosystem files
 from services import fmp_v3, fmp_stable, try_endpoints, fetch_yfinance_eps
@@ -9,6 +15,77 @@ from models import get_terminal_growth, run_dcf_engine
 
 app = Flask(__name__)
 CORS(app)
+
+load_dotenv()
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me")
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:5000/api/auth/callback")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:4200")
+
+mongo_client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))
+mongo_db = mongo_client[os.getenv("MONGO_DB", "faf_db")]
+zakat_collection = mongo_db[os.getenv("MONGO_COLLECTION", "zakat_calculations")]
+
+
+@app.route("/api/auth/google")
+def auth_google():
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        return jsonify({"error": "Google OAuth is not configured"}), 500
+
+    auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode({
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "access_type": "offline",
+        "prompt": "select_account",
+    })
+    return jsonify({"authUrl": auth_url})
+
+
+@app.route("/api/auth/callback")
+def auth_google_callback():
+    code = request.args.get("code")
+    if not code:
+        return jsonify({"error": "Missing authorization code"}), 400
+
+    token_response = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "code": code,
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "redirect_uri": GOOGLE_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        },
+        timeout=20,
+    )
+    token_response.raise_for_status()
+    access_token = token_response.json().get("access_token")
+    if not access_token:
+        return jsonify({"error": "Google login failed to return an access token"}), 500
+
+    profile_response = requests.get(
+        "https://openidconnect.googleapis.com/v1/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=20,
+    )
+    profile_response.raise_for_status()
+    profile = profile_response.json()
+
+    redirect_params = urlencode({
+        "auth": "success",
+        "name": profile.get("name", ""),
+        "email": profile.get("email", ""),
+    })
+    return redirect(f"{FRONTEND_URL}/?{redirect_params}")
+
+
+@app.route("/api/auth/logout", methods=["POST"])
+def auth_logout():
+    return jsonify({"message": "logged out"})
 
 @app.route("/")
 def index():
@@ -198,6 +275,26 @@ def stock_data(ticker):
 
     result["warnings"] = errors
     return jsonify(result)
+
+
+@app.route("/api/zakat", methods=["POST"])
+def save_zakat_calculation():
+    payload = request.get_json(silent=True) or {}
+    inputs = payload.get("inputs", {})
+    result = payload.get("result", {})
+
+    if not isinstance(inputs, dict) or not isinstance(result, dict):
+        return jsonify({"error": "inputs and result must be objects"}), 400
+
+    document = {
+        "type": "zakat-calculation",
+        "createdAt": datetime.utcnow(),
+        "inputs": inputs,
+        "result": result,
+    }
+
+    inserted = zakat_collection.insert_one(document)
+    return jsonify({"message": "saved", "id": str(inserted.inserted_id)}), 201
 
 if __name__ == "__main__":
     print("\n Modular Hybrid Backend Server Online — Listening on Port 5000")

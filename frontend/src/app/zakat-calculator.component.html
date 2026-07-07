@@ -320,8 +320,13 @@
     </div>
 
     <div class="export-buttons">
+      <button class="export-btn export-save" *ngIf="(auth$ | async)?.loggedIn" (click)="saveToMongoDb()" title="Save to MongoDB">💾 Save to MongoDB</button>
       <button class="export-btn export-pdf" (click)="exportToPDF()" title="Export to PDF">📄 Export to PDF</button>
       <button class="export-btn export-csv" (click)="exportToCSV()" title="Export to CSV">📊 Export to CSV</button>
+    </div>
+
+    <div class="save-note" *ngIf="!(auth$ | async)?.loggedIn">
+      Sign in with Google from the Home tab to enable saving this Zakat calculation to MongoDB.
     </div>
 
     <div class="summary colorful-summary" *ngIf="result">

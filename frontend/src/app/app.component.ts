@@ -21,6 +21,14 @@ export class AppComponent implements OnInit {
     this.auth.auth$.subscribe(state => {
       this.user = state;
     });
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') === 'success') {
+      const name = params.get('name') || 'Google User';
+      const email = params.get('email') || '';
+      this.auth.setUser({ name, email });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 
   selectTab(tab: string) {

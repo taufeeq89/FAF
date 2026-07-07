@@ -9,4 +9,8 @@ export class StockService {
   getStock(ticker: string): Observable<any> {
     return this.http.get<any>(`/api/stock/${ticker}`);
   }
+
+  saveZakatCalculation(payload: { inputs: Record<string, unknown>; result: Record<string, unknown> }): Observable<any> {
+    return this.http.post<any>(`/api/zakat`, payload);
+  }
 }
