@@ -12,8 +12,13 @@ import { StockService } from './stock.service';
 })
 export class ZakatCalculatorComponent {
   auth$ = this.auth.auth$;
+  currentUser: { name?: string; email?: string; loggedIn: boolean } = { loggedIn: false };
 
-  constructor(private stockService: StockService, private auth: AuthService) {}
+  constructor(private stockService: StockService, private auth: AuthService) {
+    this.auth.auth$.subscribe((state) => {
+      this.currentUser = state;
+    });
+  }
 
   @ViewChild('popupCard') popupCardRef?: ElementRef<HTMLElement>;
   popupType: string | null = null;
@@ -237,6 +242,11 @@ export class ZakatCalculatorComponent {
   }
 
   saveToMongoDb() {
+    if (!this.currentUser.loggedIn || !this.currentUser.email) {
+      alert('Please sign in with Google before saving.');
+      return;
+    }
+
     this.calculateZakat();
 
     if (!this.result) {
@@ -287,7 +297,11 @@ export class ZakatCalculatorComponent {
         nisab: this.nisab,
         zakatRate: this.zakatRate
       },
-      result: this.result
+      result: this.result,
+      user: {
+        name: this.currentUser.name || '',
+        email: this.currentUser.email
+      }
     };
 
     this.stockService.saveZakatCalculation(payload).subscribe({

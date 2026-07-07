@@ -16,12 +16,12 @@ from models import get_terminal_growth, run_dcf_engine
 app = Flask(__name__)
 CORS(app)
 
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me")
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
-GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:5000/api/auth/callback")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:5001/api/auth/callback")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:4200")
 
 mongo_client = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))
@@ -31,8 +31,9 @@ zakat_collection = mongo_db[os.getenv("MONGO_COLLECTION", "zakat_calculations")]
 
 @app.route("/api/auth/google")
 def auth_google():
-    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
-        return jsonify({"error": "Google OAuth is not configured"}), 500
+    if (not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET
+            or GOOGLE_CLIENT_SECRET == "your-google-client-secret"):
+        return jsonify({"error": "Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in backend/.env"}), 500
 
     auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode({
         "client_id": GOOGLE_CLIENT_ID,
@@ -51,29 +52,34 @@ def auth_google_callback():
     if not code:
         return jsonify({"error": "Missing authorization code"}), 400
 
-    token_response = requests.post(
-        "https://oauth2.googleapis.com/token",
-        data={
-            "code": code,
-            "client_id": GOOGLE_CLIENT_ID,
-            "client_secret": GOOGLE_CLIENT_SECRET,
-            "redirect_uri": GOOGLE_REDIRECT_URI,
-            "grant_type": "authorization_code",
-        },
-        timeout=20,
-    )
-    token_response.raise_for_status()
-    access_token = token_response.json().get("access_token")
-    if not access_token:
-        return jsonify({"error": "Google login failed to return an access token"}), 500
+    try:
+        token_response = requests.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "code": code,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "redirect_uri": GOOGLE_REDIRECT_URI,
+                "grant_type": "authorization_code",
+            },
+            timeout=20,
+        )
+        token_response.raise_for_status()
+        access_token = token_response.json().get("access_token")
+        if not access_token:
+            raise ValueError("token_missing")
 
-    profile_response = requests.get(
-        "https://openidconnect.googleapis.com/v1/userinfo",
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=20,
-    )
-    profile_response.raise_for_status()
-    profile = profile_response.json()
+        profile_response = requests.get(
+            "https://openidconnect.googleapis.com/v1/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=20,
+        )
+        profile_response.raise_for_status()
+        profile = profile_response.json()
+    except requests.HTTPError:
+        return redirect(f"{FRONTEND_URL}/?auth=error&reason=oauth_unauthorized")
+    except Exception:
+        return redirect(f"{FRONTEND_URL}/?auth=error&reason=oauth_failed")
 
     redirect_params = urlencode({
         "auth": "success",
@@ -282,13 +288,22 @@ def save_zakat_calculation():
     payload = request.get_json(silent=True) or {}
     inputs = payload.get("inputs", {})
     result = payload.get("result", {})
+    user = payload.get("user", {})
 
-    if not isinstance(inputs, dict) or not isinstance(result, dict):
-        return jsonify({"error": "inputs and result must be objects"}), 400
+    if not isinstance(inputs, dict) or not isinstance(result, dict) or not isinstance(user, dict):
+        return jsonify({"error": "inputs, result and user must be objects"}), 400
+
+    user_email = str(user.get("email", "")).strip().lower()
+    if not user_email:
+        return jsonify({"error": "logged in user email is required"}), 400
 
     document = {
         "type": "zakat-calculation",
         "createdAt": datetime.utcnow(),
+        "user": {
+            "name": str(user.get("name", "")).strip(),
+            "email": user_email,
+        },
         "inputs": inputs,
         "result": result,
     }
@@ -296,6 +311,30 @@ def save_zakat_calculation():
     inserted = zakat_collection.insert_one(document)
     return jsonify({"message": "saved", "id": str(inserted.inserted_id)}), 201
 
+
+@app.route("/api/zakat/history", methods=["GET"])
+def get_zakat_history():
+    email = request.args.get("email", "").strip().lower()
+    if not email:
+        return jsonify({"error": "email is required"}), 400
+
+    cursor = (zakat_collection
+              .find({"type": "zakat-calculation", "user.email": email})
+              .sort("createdAt", -1)
+              .limit(100))
+
+    items = []
+    for doc in cursor:
+        items.append({
+            "id": str(doc.get("_id")),
+            "createdAt": doc.get("createdAt").isoformat() if doc.get("createdAt") else "",
+            "user": doc.get("user", {}),
+            "result": doc.get("result", {}),
+            "inputs": doc.get("inputs", {}),
+        })
+
+    return jsonify({"items": items})
+
 if __name__ == "__main__":
-    print("\n Modular Hybrid Backend Server Online — Listening on Port 5000")
-    app.run(debug=True, port=5000)
+    print("\n Modular Hybrid Backend Server Online — Listening on Port 5001")
+    app.run(debug=True, port=5001)

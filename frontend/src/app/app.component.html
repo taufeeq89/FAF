@@ -1,6 +1,15 @@
+<div class="top-nav">
+  <div class="top-nav-title">FAF</div>
+  <div class="top-nav-actions">
+    <button class="top-nav-btn" [class.active]="activeTab === 'profile'" (click)="selectTab('profile')">Profile</button>
+    <button class="top-nav-btn sign-in" *ngIf="!user.loggedIn" (click)="login()">Sign in with Google</button>
+    <div class="top-nav-user" *ngIf="user.loggedIn">{{ user.name || user.email }}</div>
+    <button class="top-nav-btn logout" *ngIf="user.loggedIn" (click)="logout()">Logout</button>
+  </div>
+</div>
+
 <div class="tabs">
   <button class="tab-button" [class.active]="activeTab === 'home'" (click)="selectTab('home')">Home</button>
-  <button class="tab-button" [class.active]="activeTab === 'profile'" (click)="selectTab('profile')">Profile</button>
   <button class="tab-button" [class.active]="activeTab === 'stock'" (click)="selectTab('stock')">Stock</button>
   <button class="tab-button" [class.active]="activeTab === 'zakat'" (click)="selectTab('zakat')">Zakat</button>
   <button class="tab-button" [class.active]="activeTab === 'settings'" (click)="selectTab('settings')">Settings</button>
@@ -11,12 +20,7 @@
     <div *ngIf="activeTab === 'home'">
       <h1>Welcome to FAF</h1>
       <p>This app uses a Python middle tier, MongoDB backend, and Google authentication.</p>
-      <button class="primary" *ngIf="!user.loggedIn" (click)="login()">Sign in with Google</button>
-      <div *ngIf="user.loggedIn" class="login-status">
-        <p><strong>Signed in as:</strong> {{ user.name }}</p>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <button class="primary" (click)="logout()">Logout</button>
-      </div>
+      <p class="auth-error" *ngIf="authError">{{ authError }}</p>
     </div>
 
     <div *ngIf="activeTab === 'profile'">
@@ -25,6 +29,21 @@
       <div *ngIf="user.loggedIn">
         <p>Name: {{ user.name }}</p>
         <p>Email: {{ user.email }}</p>
+
+        <h3>Saved Zakat Records</h3>
+        <p *ngIf="loadingZakatRecords">Loading saved records...</p>
+        <p class="auth-error" *ngIf="zakatRecordsError">{{ zakatRecordsError }}</p>
+        <p *ngIf="!loadingZakatRecords && !zakatRecordsError && zakatRecords.length === 0">No Zakat records saved yet.</p>
+
+        <div class="records-grid" *ngIf="!loadingZakatRecords && zakatRecords.length > 0">
+          <div class="record-card" *ngFor="let record of zakatRecords">
+            <div class="record-row"><span>Saved</span><strong>{{ record.createdAt | date:'medium' }}</strong></div>
+            <div class="record-row"><span>Total Assets</span><strong>{{ record.result?.totalAssets | number:'1.2-2' }}</strong></div>
+            <div class="record-row"><span>Net Assets</span><strong>{{ record.result?.netAssets | number:'1.2-2' }}</strong></div>
+            <div class="record-row"><span>Zakat Due</span><strong>{{ record.result?.zakatDue | number:'1.2-2' }}</strong></div>
+            <div class="record-row"><span>Eligible</span><strong>{{ record.result?.isEligible ? 'Yes' : 'No' }}</strong></div>
+          </div>
+        </div>
       </div>
     </div>
 

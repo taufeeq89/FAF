@@ -13,4 +13,8 @@ export class StockService {
   saveZakatCalculation(payload: { inputs: Record<string, unknown>; result: Record<string, unknown> }): Observable<any> {
     return this.http.post<any>(`/api/zakat`, payload);
   }
+
+  getZakatHistory(email: string): Observable<{ items: any[] }> {
+    return this.http.get<{ items: any[] }>(`/api/zakat/history?email=${encodeURIComponent(email)}`);
+  }
 }
