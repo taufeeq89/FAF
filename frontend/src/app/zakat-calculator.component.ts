@@ -1,23 +1,58 @@
-import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ZAKAT_POPUP_CONTENT, ZAKAT_SECTION_POPUPS } from './zakat-popup-content';
 import jsPDF from 'jspdf';
 import Papa from 'papaparse';
 import { AuthService } from './auth.service';
 import { StockService } from './stock.service';
+import { ZakatRecordStateService } from './zakat-record-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-zakat-calculator',
   templateUrl: './zakat-calculator.component.html',
   styleUrls: ['./zakat-calculator.component.css']
 })
-export class ZakatCalculatorComponent {
+export class ZakatCalculatorComponent implements OnInit, OnDestroy {
   auth$ = this.auth.auth$;
   currentUser: { name?: string; email?: string; loggedIn: boolean } = { loggedIn: false };
+  editingRecordId = '';
+  updateInProgress = false;
+  editingRecordMessage = '';
+  updateError = '';
+  private readonly subscriptions = new Subscription();
 
-  constructor(private stockService: StockService, private auth: AuthService) {
-    this.auth.auth$.subscribe((state) => {
-      this.currentUser = state;
-    });
+  constructor(
+    private stockService: StockService,
+    private auth: AuthService,
+    private zakatRecordState: ZakatRecordStateService
+  ) {}
+
+  ngOnInit() {
+    this.subscriptions.add(
+      this.auth.auth$.subscribe((state) => {
+        this.currentUser = state;
+      })
+    );
+
+    const pendingRecord = this.zakatRecordState.consumeEditingRecord();
+    if (pendingRecord) {
+      this.loadInputsForEditing(pendingRecord);
+    }
+
+    this.subscriptions.add(
+      this.zakatRecordState.editingRecord$.subscribe((record) => {
+        if (!record) {
+          return;
+        }
+
+        this.loadInputsForEditing(record);
+        this.zakatRecordState.clearEditingRecord();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
   }
 
   @ViewChild('popupCard') popupCardRef?: ElementRef<HTMLElement>;
@@ -241,6 +276,116 @@ export class ZakatCalculatorComponent {
     return this.totalGeneralLiabilities * -0.0275;
   }
 
+  private getInputsPayload() {
+    return {
+      gold24Weight: this.gold24Weight,
+      gold24PricePerGram: this.gold24PricePerGram,
+      gold22Weight: this.gold22Weight,
+      gold22PricePerGram: this.gold22PricePerGram,
+      gold18Weight: this.gold18Weight,
+      gold18PricePerGram: this.gold18PricePerGram,
+      otherGold: this.otherGold,
+      preciousStones: this.preciousStones,
+      silverWeight: this.silverWeight,
+      silverPricePerGram: this.silverPricePerGram,
+      cashInHand: this.cashInHand,
+      cashInSavings: this.cashInSavings,
+      cashInCurrent: this.cashInCurrent,
+      cashInFixedDeposits: this.cashInFixedDeposits,
+      loansReceivable: this.loansReceivable,
+      govtBonds: this.govtBonds,
+      providentFund: this.providentFund,
+      insurancePremiums: this.insurancePremiums,
+      sharesAndDividends: this.sharesAndDividends,
+      securityDeposits: this.securityDeposits,
+      privateInvestments: this.privateInvestments,
+      otherWealth: this.otherWealth,
+      landedProperty: this.landedProperty,
+      businessSaleableStock: this.businessSaleableStock,
+      businessDamagedStock: this.businessDamagedStock,
+      businessReceivables: this.businessReceivables,
+      businessPayables: this.businessPayables,
+      businessBadDebts: this.businessBadDebts,
+      partnershipCapital: this.partnershipCapital,
+      partnershipLoansAdvanced: this.partnershipLoansAdvanced,
+      partnershipWithdrawals: this.partnershipWithdrawals,
+      partnershipProfitShare: this.partnershipProfitShare,
+      agriculturalProduce: this.agriculturalProduce,
+      agriculturalArtificialIrrigationProduce: this.agriculturalArtificialIrrigationProduce,
+      agriculturalMixedIrrigationProduce: this.agriculturalMixedIrrigationProduce,
+      livestockValue: this.livestockValue,
+      generalLiabilitiesFriends: this.generalLiabilitiesFriends,
+      generalLiabilitiesBanks: this.generalLiabilitiesBanks,
+      generalLiabilitiesTax: this.generalLiabilitiesTax,
+      nisab: this.nisab,
+      zakatRate: this.zakatRate
+    };
+  }
+
+  private loadInputsForEditing(record: any) {
+    const inputs = record?.inputs || {};
+    if (!record?.id || typeof inputs !== 'object' || Object.keys(inputs).length === 0) {
+      this.updateError = 'This saved record has no input snapshot to load into the form.';
+      return;
+    }
+
+    const keys = Object.keys(this.getInputsPayload());
+    keys.forEach((key) => {
+      const rawValue = (inputs as Record<string, unknown>)[key];
+      (this as any)[key] = Number(rawValue ?? 0) || 0;
+    });
+
+    this.editingRecordId = record.id;
+    this.editingRecordMessage = 'Editing a saved record. You can Update Existing or Save as New.';
+    this.updateError = '';
+    this.calculateZakat();
+  }
+
+  saveAsNewRecord() {
+    this.saveToMongoDb();
+  }
+
+  cancelEditingRecord() {
+    this.editingRecordId = '';
+    this.editingRecordMessage = '';
+    this.updateError = '';
+  }
+
+  updateExistingRecord() {
+    if (!this.currentUser.loggedIn || !this.currentUser.email) {
+      alert('Please sign in with Google before updating.');
+      return;
+    }
+
+    if (!this.editingRecordId) {
+      alert('Select a saved record from Profile to update.');
+      return;
+    }
+
+    this.calculateZakat();
+    if (!this.result) {
+      return;
+    }
+
+    this.updateInProgress = true;
+    this.updateError = '';
+
+    this.stockService.updateZakatCalculation(this.editingRecordId, {
+      email: this.currentUser.email,
+      inputs: this.getInputsPayload(),
+      result: this.result,
+    }).subscribe({
+      next: () => {
+        this.updateInProgress = false;
+        alert('Saved record updated successfully.');
+      },
+      error: () => {
+        this.updateInProgress = false;
+        this.updateError = 'Failed to update record. Please try again.';
+      }
+    });
+  }
+
   saveToMongoDb() {
     if (!this.currentUser.loggedIn || !this.currentUser.email) {
       alert('Please sign in with Google before saving.');
@@ -254,49 +399,7 @@ export class ZakatCalculatorComponent {
     }
 
     const payload = {
-      inputs: {
-        gold24Weight: this.gold24Weight,
-        gold24PricePerGram: this.gold24PricePerGram,
-        gold22Weight: this.gold22Weight,
-        gold22PricePerGram: this.gold22PricePerGram,
-        gold18Weight: this.gold18Weight,
-        gold18PricePerGram: this.gold18PricePerGram,
-        otherGold: this.otherGold,
-        preciousStones: this.preciousStones,
-        silverWeight: this.silverWeight,
-        silverPricePerGram: this.silverPricePerGram,
-        cashInHand: this.cashInHand,
-        cashInSavings: this.cashInSavings,
-        cashInCurrent: this.cashInCurrent,
-        cashInFixedDeposits: this.cashInFixedDeposits,
-        loansReceivable: this.loansReceivable,
-        govtBonds: this.govtBonds,
-        providentFund: this.providentFund,
-        insurancePremiums: this.insurancePremiums,
-        sharesAndDividends: this.sharesAndDividends,
-        securityDeposits: this.securityDeposits,
-        privateInvestments: this.privateInvestments,
-        otherWealth: this.otherWealth,
-        landedProperty: this.landedProperty,
-        businessSaleableStock: this.businessSaleableStock,
-        businessDamagedStock: this.businessDamagedStock,
-        businessReceivables: this.businessReceivables,
-        businessPayables: this.businessPayables,
-        businessBadDebts: this.businessBadDebts,
-        partnershipCapital: this.partnershipCapital,
-        partnershipLoansAdvanced: this.partnershipLoansAdvanced,
-        partnershipWithdrawals: this.partnershipWithdrawals,
-        partnershipProfitShare: this.partnershipProfitShare,
-        agriculturalProduce: this.agriculturalProduce,
-        agriculturalArtificialIrrigationProduce: this.agriculturalArtificialIrrigationProduce,
-        agriculturalMixedIrrigationProduce: this.agriculturalMixedIrrigationProduce,
-        livestockValue: this.livestockValue,
-        generalLiabilitiesFriends: this.generalLiabilitiesFriends,
-        generalLiabilitiesBanks: this.generalLiabilitiesBanks,
-        generalLiabilitiesTax: this.generalLiabilitiesTax,
-        nisab: this.nisab,
-        zakatRate: this.zakatRate
-      },
+      inputs: this.getInputsPayload(),
       result: this.result,
       user: {
         name: this.currentUser.name || '',

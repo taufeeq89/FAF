@@ -319,8 +319,22 @@
       <input type="number" [(ngModel)]="zakatRate" (ngModelChange)="onValueChange()" />
     </div>
 
+    <div class="edit-mode-note" *ngIf="editingRecordId">
+      {{ editingRecordMessage }}
+    </div>
+
+    <div class="update-error" *ngIf="updateError">{{ updateError }}</div>
+
+    <div class="edit-action-buttons" *ngIf="editingRecordId && (auth$ | async)?.loggedIn">
+      <button class="export-btn export-update" [disabled]="updateInProgress" (click)="updateExistingRecord()">
+        {{ updateInProgress ? 'Updating...' : 'Update Existing Record' }}
+      </button>
+      <button class="export-btn export-save-as-new" (click)="saveAsNewRecord()">Save as New</button>
+      <button class="export-btn export-cancel" [disabled]="updateInProgress" (click)="cancelEditingRecord()">Cancel Edit Mode</button>
+    </div>
+
     <div class="export-buttons">
-      <button class="export-btn export-save" *ngIf="(auth$ | async)?.loggedIn" (click)="saveToMongoDb()" title="Save to MongoDB">💾 Save to MongoDB</button>
+      <button class="export-btn export-save" *ngIf="(auth$ | async)?.loggedIn && !editingRecordId" (click)="saveToMongoDb()" title="Save to MongoDB">💾 Save to MongoDB</button>
       <button class="export-btn export-pdf" (click)="exportToPDF()" title="Export to PDF">📄 Export to PDF</button>
       <button class="export-btn export-csv" (click)="exportToCSV()" title="Export to CSV">📊 Export to CSV</button>
     </div>

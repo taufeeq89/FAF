@@ -8,6 +8,8 @@ import requests
 import yfinance as yf
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from bson import ObjectId
+from bson.errors import InvalidId
 
 # Import modules from our segregated ecosystem files
 from services import fmp_v3, fmp_stable, try_endpoints, fetch_yfinance_eps
@@ -334,6 +336,47 @@ def get_zakat_history():
         })
 
     return jsonify({"items": items})
+
+
+@app.route("/api/zakat/<record_id>", methods=["PUT"])
+def update_zakat_calculation(record_id):
+    payload = request.get_json(silent=True) or {}
+    email = str(payload.get("email", "")).strip().lower()
+    result = payload.get("result", {})
+    inputs = payload.get("inputs", None)
+
+    if not email:
+        return jsonify({"error": "email is required"}), 400
+    if not isinstance(result, dict):
+        return jsonify({"error": "result must be an object"}), 400
+    if inputs is not None and not isinstance(inputs, dict):
+        return jsonify({"error": "inputs must be an object when provided"}), 400
+
+    try:
+        object_id = ObjectId(record_id)
+    except InvalidId:
+        return jsonify({"error": "invalid record id"}), 400
+
+    update_fields = {
+        "result": result,
+        "updatedAt": datetime.utcnow(),
+    }
+    if isinstance(inputs, dict):
+        update_fields["inputs"] = inputs
+
+    update_result = zakat_collection.update_one(
+        {
+            "_id": object_id,
+            "type": "zakat-calculation",
+            "user.email": email,
+        },
+        {"$set": update_fields}
+    )
+
+    if update_result.matched_count == 0:
+        return jsonify({"error": "record not found"}), 404
+
+    return jsonify({"message": "updated"})
 
 if __name__ == "__main__":
     print("\n Modular Hybrid Backend Server Online — Listening on Port 5001")

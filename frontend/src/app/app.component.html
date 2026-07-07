@@ -42,6 +42,10 @@
             <div class="record-row"><span>Net Assets</span><strong>{{ record.result?.netAssets | number:'1.2-2' }}</strong></div>
             <div class="record-row"><span>Zakat Due</span><strong>{{ record.result?.zakatDue | number:'1.2-2' }}</strong></div>
             <div class="record-row"><span>Eligible</span><strong>{{ record.result?.isEligible ? 'Yes' : 'No' }}</strong></div>
+
+            <div class="record-actions">
+              <button class="top-nav-btn" (click)="editRecordInZakatForm(record)">Update In Form</button>
+            </div>
           </div>
         </div>
       </div>

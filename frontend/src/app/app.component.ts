@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './auth.service';
 import { StockService } from './stock.service';
+import { ZakatRecordStateService } from './zakat-record-state.service';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,11 @@ export class AppComponent implements OnInit {
   stockError = '';
   loadingStock = false;
 
-  constructor(private auth: AuthService, private stockService: StockService) {}
+  constructor(
+    private auth: AuthService,
+    private stockService: StockService,
+    private zakatRecordState: ZakatRecordStateService
+  ) {}
 
   ngOnInit() {
     this.auth.auth$.subscribe(state => {
@@ -82,6 +87,11 @@ export class AppComponent implements OnInit {
         this.zakatRecordsError = 'Could not load saved Zakat records.';
       }
     );
+  }
+
+  editRecordInZakatForm(record: any) {
+    this.zakatRecordState.setEditingRecord(record);
+    this.activeTab = 'zakat';
   }
 
   lookupStock() {

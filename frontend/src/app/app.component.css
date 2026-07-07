@@ -294,6 +294,10 @@ header p {
   color: #0f172a;
 }
 
+.record-actions {
+  margin-top: 10px;
+}
+
 @media (max-width: 860px) {
   .grid {
     grid-template-columns: 1fr;
